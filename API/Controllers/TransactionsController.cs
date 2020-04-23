@@ -27,5 +27,20 @@ namespace API.Controllers
                 return BadRequest(e.ToString());
             }
         }
+        [HttpGet]
+        public IHttpActionResult GetTransactionList()
+        {
+            List<TransactionListModel> transactionsToReturn = 
+                _ctx.
+                Transactions
+                .Select(transaction => new TransactionListModel
+                {
+                    NameOfCustomer = transaction.Customer.Name,
+                    ProductDescription = transaction.Product.Description,
+                    Total = transaction.TransactionTotal
+                })
+                .ToList();
+            return Ok(transactionsToReturn);
+        }
     }
 }
