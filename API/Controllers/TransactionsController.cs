@@ -2,20 +2,20 @@
 using API.Models;
 using System;
 using System.Collections.Generic;
+using System.Data.Entity.Infrastructure.Interception;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Web.Http;
+using System.Web.UI;
 
 namespace API.Controllers
 {
-    [RoutePrefix("api/transactions")]
     public class TransactionsController : ApiController
     {
         private ApplicationDbContext _ctx = new ApplicationDbContext();
 
         [HttpPost]
-        [Route("create")]
         public IHttpActionResult CreateTransaction([FromBody] Transaction transactionToCreate)
         {
             try
@@ -29,22 +29,48 @@ namespace API.Controllers
                 return BadRequest(e.ToString());
             }
         }
-        // by leaving no [Route("something")] attribute we are leaving the endpoint as
-        // GET api/transactions
+
         [HttpGet]
-        public IHttpActionResult GetTransactionList()
+        public IHttpActionResult ReadAllTransactions([FromBody] Transaction transactionToRead)
         {
-            List<TransactionListModel> transactionsToReturn = 
-                _ctx.
-                Transactions
-                .Select(transaction => new TransactionListModel
-                {
-                    NameOfCustomer = transaction.Customer.Name,
-                    ProductDescription = transaction.Product.Description,
-                    Total = transaction.TransactionTotal
-                })
-                .ToList();
-            return Ok(transactionsToReturn);
+            return Ok(_ctx.Transactions.ToList());
+        }
+
+        [HttpGet]
+        public IHttpActionResult ReadIndividualTransaction(int transactionId)
+        {
+            var transactionToReturn = _ctx.Transactions.Find(transactionId);
+            if (transactionToReturn == null)
+            {
+                return BadRequest("The transaction doesn't exist.");
+            }
+            return Ok(transactionToReturn);
+        }
+
+        [HttpPut]
+        public IHttpActionResult UpdateTransaction([FromUri] int transactionToUpdateId, [FromBody] Transaction updatedTransaction)
+        {
+            var currentTransaction = _ctx.Transactions.Find(transactionToUpdateId);
+            if (currentTransaction == null)
+            {
+                return BadRequest("The transaction doesn't exist.");
+            }
+            currentTransaction.TransactionId = updatedTransaction.TransactionId;
+            currentTransaction.TransactionTotal = updatedTransaction.TransactionTotal;
+            _ctx.SaveChanges();
+            return Ok();
+        }
+
+        [HttpDelete]
+        public IHttpActionResult DeleteTransaction([FromUri] int transactionToDeleteId)
+        {
+            var transactionToDelete = _ctx.Transactions.Find(transactionToDeleteId);
+            if (transactionToDelete == null)
+            {
+                return BadRequest("The transaction doesn't exist.");
+            }
+            _ctx.Transactions.Remove(transactionToDelete);
+            return Ok();
         }
     }
 }
