@@ -9,13 +9,14 @@ using System.Web.Http;
 
 namespace API.Controllers
 {
-    // api/products
+    [RoutePrefix("api/products")]
     public class ProductsController : ApiController
     {
         private ApplicationDbContext _ctx = new ApplicationDbContext();
 
         // POST api/products
         [HttpPost]
+        [Route("create")]
         public IHttpActionResult CreateProduct(Product productToCreate)
         {
             if (ModelState.IsValid)
@@ -32,8 +33,10 @@ namespace API.Controllers
         {
             return Ok(_ctx.Products.ToList());
         }
-
-        [HttpGet]// api/products?productId=4
+        // by putting the {productId} in there, we will automatically have productId mapped to whatever is after the / in the url
+        // example: api/products/4 is the same as api/products?productId=4
+        [HttpGet]
+        [Route("{productId}")]
         public IHttpActionResult GetIndividualProduct(int productId)
         {
             var productToReturn = _ctx.Products.Find(productId);
@@ -45,6 +48,7 @@ namespace API.Controllers
         }
 
         [HttpPut]
+        [Route("update")]
         public IHttpActionResult UpdateIndividualProduct([FromUri] int productToUpdateId, [FromBody] Product updatedProduct)
         {
             var currentProduct = _ctx.Products.Find(productToUpdateId);
@@ -58,6 +62,7 @@ namespace API.Controllers
             return Ok();
         }
         [HttpDelete]
+        [Route("delete")]
         public IHttpActionResult DeleteInidividualProduct([FromUri] int productToDeleteId)
         {
             var productToDelete = _ctx.Products.Find(productToDeleteId);

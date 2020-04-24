@@ -9,11 +9,13 @@ using System.Web.Http;
 
 namespace API.Controllers
 {
+    [RoutePrefix("api/transactions")]
     public class TransactionsController : ApiController
     {
         private ApplicationDbContext _ctx = new ApplicationDbContext();
 
         [HttpPost]
+        [Route("create")]
         public IHttpActionResult CreateTransaction([FromBody] Transaction transactionToCreate)
         {
             try
@@ -27,6 +29,8 @@ namespace API.Controllers
                 return BadRequest(e.ToString());
             }
         }
+        // by leaving no [Route("something")] attribute we are leaving the endpoint as
+        // GET api/transactions
         [HttpGet]
         public IHttpActionResult GetTransactionList()
         {

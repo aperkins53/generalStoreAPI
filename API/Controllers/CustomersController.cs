@@ -9,11 +9,13 @@ using System.Web.Http;
 
 namespace API.Controllers
 {
+    [RoutePrefix("api/customers")]
     public class CustomersController : ApiController
     {
         private ApplicationDbContext _ctx = new ApplicationDbContext();
 
         [HttpPost]
+        [Route("create")]
         public IHttpActionResult CreateCustomer([FromBody] Customer customerToCreate)
         {
             _ctx.Customers.Add(customerToCreate);
